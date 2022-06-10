@@ -11,10 +11,11 @@ $index = 1;
 foreach ($answer_data_pairs as $input => $output){
     $flag = true;
     $data = getData($input);
-    $my_answ = getMyAnswer($data);
+    $my_answ = showAds($data);
     $prog_anws = getGoodAnswer($output);
     for($i=1; $i<count($my_answ)+1; $i=$i+1){
-        $my_answ[$i-1] == $prog_anws[$i-1] ? $flag = true : $flag = false;
+        ($my_answ[$prog_anws[$i-1]["name"]] - $prog_anws[$i-1]["weight"]) < 0.0005 ? $flag = true : $flag = false;
+        if(!$flag) break;
     }
     $flag ? print_r("{$index}.OK\n") : print_r("{$index}.Wrong\n");
     $index = $index + 1;

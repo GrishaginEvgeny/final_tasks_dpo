@@ -1,14 +1,14 @@
 <?php
-phpinfo();
 class TreeNode
 {
+    //Приватные поля
     private $val;
     private int $left_key;
     private int $right_key;
     private $id;
-    private array $childs;
+    private ?array $childs;
 
-
+    //Контруктор и инициализацией полей
     function __construct($id,$value, $left, $right)
     {
         $this->val = $value;
@@ -18,6 +18,7 @@ class TreeNode
         $this->childs = array();
     }
 
+    //геттеры и сеттеры
     public function getVal(){
         return $this->val;
     }
@@ -36,7 +37,7 @@ class TreeNode
         return $this->right_key;
     }
 
-    public function setChilds(array $childs){
+    public function setChilds(?array $childs){
         $this->childs = $childs;
     }
 
@@ -47,8 +48,10 @@ class TreeNode
 
 class BinaryTree
 {
+    //массив, который обозначает дерево
     private array $tree;
 
+    //Контруктор и инициализацией полей
     function __construct()
     {
         $this->tree = array();
@@ -57,15 +60,18 @@ class BinaryTree
     /**
      * @return array
      */
+    //геттер для дерева
     public function getTree(): array
     {
         return $this->tree;
     }
 
+    //функция добавления узла в дерево
     public function addNode(TreeNode $node){
         array_push($this->tree, $node);
     }
 
+    //функция, которая возвращает узел(TreeNode) по левому ключу
     public function getNodeByLeftKey($left_key): ?TreeNode
     {
         foreach ($this->tree as $node) {
@@ -76,9 +82,10 @@ class BinaryTree
         return null;
     }
 
+    //функция, которая возвращает все на TreeNode (array), которые на ходятся на уровне с $node переданным в функцию
     public function findBrothersByNode($node):?array{
-        var_dump($node);
         $node_array = array();
+        if($node === null) return $node_array;
         $left_key_on_node = $node->getLeftKey();
         while (True) {
             $new_node = $this->getNodeByLeftKey($left_key_on_node);
@@ -89,22 +96,24 @@ class BinaryTree
         return $node_array;
     }
 
+    //функция, которая возвращает все дочерние TreeNode (array) $node переданного в функцию
     public function findChildsByNode($node):?array{
         $childs = $this->findBrothersByNode($this->getNodeByLeftKey($node->getLeftKey()+1));
         return $childs;
     }
 
-    public function printTree($node, $level){
-        //var_dump($this->tree);
-        $print_string = str_repeat("-", $level).$node->getVal()."\n";
-        print_r($print_string);
+    //операция вывода дерева
+    public function printTree($node, $level, &$result){
+        $print_string = str_repeat("-", $level).$node->getVal();
+        array_push($result,$print_string);
         foreach ($node->getChilds() as $node) {
-            $this->printTree($node, $level+1);
+            $this->printTree($node, $level+1,$result);
         }
     }
 
 }
 
+//получение результата из функций
 function getResult($file_path){
     $file = fopen($file_path, 'r');
     $tree = new BinaryTree();
@@ -117,10 +126,22 @@ function getResult($file_path){
     foreach ($tree->getTree() as $node){
         $node->setChilds($tree->findChildsByNode($node));
     }
-
+    $result = [];
     foreach ($tree->findBrothersByNode($tree->getNodeByLeftKey(1)) as $node) {
-        $tree->printTree($node, 0);
+        $tree->printTree($node, 0,$result);
     }
+    return $result;
+}
+
+//получение ответа из файла
+function getGoodAnswer($file_path): ?array {
+    $result = array();
+    $file=fopen($file_path, 'r');
+    while(!feof($file)) {
+        $line = fgets($file);
+        array_push($result, $line);
+    }
+    return $result;
 }
 
 getResult('./data/7.dat');
